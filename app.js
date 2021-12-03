@@ -2,9 +2,11 @@ const express = require("express");
 const {
   sequelize,
   User,
-  AadharCardDetail,
   Address,
   UserRole,
+  Image,
+  Video,
+  Comment,
 } = require("./models");
 
 const app = express();
@@ -274,6 +276,73 @@ app.put("/users/:userUuid/addresses/:addressUuid", async (req, res) => {
     res.json("Address updated successfully!");
   } catch (err) {
     res.status(500).json("Something went wrong!" + err);
+  }
+});
+
+app.post("/images", async (req, res) => {
+  const { url, width, height } = req.body;
+  try {
+    const image = await Image.create({ url, width, height });
+    res.json({ msg: "Image created successfully!", data: image });
+  } catch (error) {
+    res.status(404).json({ msg: "Something went wrong!", error });
+  }
+});
+
+app.post("/images/:id/comments", async (req, res) => {
+  const { text } = req.body;
+  const { id } = req.params;
+  try {
+    const image = await Image.findOne({ where: { id } });
+    const comment = await image.createComment({ text });
+    res.json({ msg: "Comment made successfully!", data: comment });
+  } catch (error) {
+    console.log(error);
+    res.status(404).json({ msg: "Something went wrong!", error });
+  }
+});
+
+app.get("/images/:id/comments", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const image = await Image.findOne({ where: { id } });
+    const comments = await image.getComments();
+    res.json({ msg: "Success", data: comments });
+  } catch (error) {
+    res.status(404).json({ msg: "Something went wrong!", error });
+  }
+});
+
+app.post("/videos", async (req, res) => {
+  const { url, duration } = req.body;
+  try {
+    const video = await Video.create({ url, duration });
+    res.json({ msg: "Video created successfully!", data: video });
+  } catch (error) {
+    res.status(404).json({ msg: "Something went wrong!", error });
+  }
+});
+
+app.post("/videos/:id/comments", async (req, res) => {
+  const { text } = req.body;
+  const { id } = req.params;
+  try {
+    const video = await Video.findOne({ where: { id } });
+    const comment = await video.createComment({ text });
+    res.json({ msg: "Comment made successfully!", data: comment });
+  } catch (error) {
+    res.status(404).json({ msg: "Something went wrong!", error });
+  }
+});
+
+app.get("/videos/:id/comments", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const video = await Video.findOne({ where: { id } });
+    const comments = await video.getComments();
+    res.json({ msg: "Success", data: comments });
+  } catch (error) {
+    res.status(404).json({ msg: "Something went wrong!", error });
   }
 });
 
